@@ -38,7 +38,7 @@ class Directory {
           this._delete(argv[0], argv[0]);
           break;
         default:
-          console.log('Unknown command:', cmd);
+          throw new Error(`Unknown command: ${cmd}`);
       }
     } catch (e) {
       console.error(e.message);
