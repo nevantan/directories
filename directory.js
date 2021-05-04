@@ -1,4 +1,8 @@
 class Directory {
+  /**
+   * Represents a directory in the file system
+   * @param {string} path - The path to create, the constructor will recurse to create the entire path
+   */
   constructor(path) {
     const [name, ...rest] = path.split('/');
     this._name = name;
@@ -8,9 +12,16 @@ class Directory {
     if (rest.length > 0) this._create(rest.join('/'));
   }
 
+  /**
+   * Runs a command on the given directory
+   * @param {string} input - The command line to run, including arguments
+   */
   run(input) {
+    // Output the command that we're about to run
     console.log(input);
+
     try {
+      // Parse the command
       const [cmd, ...argv] = input.split(' ');
       switch (cmd) {
         case 'CREATE':
@@ -34,6 +45,10 @@ class Directory {
     }
   }
 
+  /**
+   * Add a child to the directory
+   * @param {Directory} dir - The directory to add as a child
+   */
   addChild(dir) {
     this._children = [...this._children, dir];
   }
@@ -42,6 +57,10 @@ class Directory {
     return this._name;
   }
 
+  /**
+   * Creates a directory at the given path, traversing as needed
+   * @param {string} path - The directory path to create
+   */
   _create(path) {
     // Split the path so we can work with individual components
     const [name, ...rest] = path.split('/');
@@ -57,6 +76,10 @@ class Directory {
     }
   }
 
+  /**
+   * Pretty prints the current directory's structure including children, recursively
+   * @param {level} int - The indent level to print the current directory name with
+   */
   _list(level = 0) {
     // If this level isn't hidden
     if (level >= 0) {
@@ -73,11 +96,21 @@ class Directory {
     this._children.forEach((dir) => dir._list(level + 1));
   }
 
+  /**
+   * Move a target directory to a new path
+   * @param {string} targetPath - The path of the directory that is to be moved
+   * @param {string} destPath - The new parent of the target directory
+   */
   _move(targetPath, destPath) {
     const target = this._pick(targetPath);
     this._place(destPath, target);
   }
 
+  /**
+   * Traverse the file tree to find a specific directory by path, remove it from the tree, and return it
+   * @param {string} path - The path of the directory to retreive from the file tree
+   * @returns {Directory}
+   */
   _pick(path) {
     const [name, ...rest] = path.split('/');
 
@@ -100,6 +133,11 @@ class Directory {
     return next._pick(rest.join('/'));
   }
 
+  /**
+   * Place the provided directory at a given path
+   * @param {string} path - The path of the new parent of the provided directory
+   * @param {Directory} dir - The directory to place at a new path
+   */
   _place(path, dir) {
     const [name, ...rest] = path.split('/');
 
@@ -115,7 +153,12 @@ class Directory {
     }
   }
 
-  _delete(path, fullPath) {
+  /**
+   * Deletes the directory at the given path
+   * @param {string} path - The path to delete
+   * @param {string} fullPath - The original path for display purposes
+   */
+  _delete(path, fullPath = '') {
     const [name, ...rest] = path.split('/');
 
     // If we're at the end of the path
@@ -127,12 +170,17 @@ class Directory {
       const subject = this._children.find((dir) => dir._name === name);
 
       if (!subject)
-        throw new Error(`Cannot delete ${fullPath} - ${name} does not exist`);
+        throw new Error(
+          `Cannot delete ${fullPath ? fullPath : path} - ${name} does not exist`
+        );
 
       subject._delete(rest.join('/'), fullPath);
     }
   }
 
+  /**
+   * Sort the children of this directory in alphabetical order
+   */
   _sortChildren() {
     this._children = [...this._children].sort((a, b) =>
       a.name.localeCompare(b.name)
